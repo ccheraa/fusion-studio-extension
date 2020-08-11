@@ -64,6 +64,7 @@ typings/
 # compiled code
 lib
 .browser_modules#
+fusion-studio-extension/src/variables.ts
 
 # ide apps
 *-app/*

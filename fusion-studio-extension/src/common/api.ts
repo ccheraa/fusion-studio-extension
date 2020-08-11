@@ -6,8 +6,8 @@ import { FSUserData, writeUserData, readUser, FSUser } from "../classes/user";
 import { FSGroupData, writeGroupData, readGroup, FSGroup } from "../classes/group";
 import { readIndex, FSIndex } from "../classes/indexes";
 import { FSRestURI } from "../classes/rest";
+import { API_MINIMUM_VERSION } from "../variables";
 
-export const API_MINIMUM_VERSION = '0.2.0';
 export const [API_MAJOR, API_MINOR, API_PATCH] = API_MINIMUM_VERSION.split('.').map(val => Number.parseInt(val));
 export const FS_API_URI = '/exist/restxq/fusiondb';
 export const RANGE_START = 1;

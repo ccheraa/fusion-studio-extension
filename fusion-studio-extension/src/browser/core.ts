@@ -7,7 +7,7 @@ import { FSDocument, FSCollection, FSItem } from "../classes/item";
 import { FSServerConnection, FSServerConnections, FSServerConnectionsChangeEvent } from "../classes/connection";
 import { CommandRegistry, Event, Emitter } from "@theia/core";
 import { actionID } from "../classes/action";
-import { FSApi, API_MINIMUM_VERSION } from "../common/api";
+import { FSApi } from "../common/api";
 import URI from "@theia/core/lib/common/uri";
 import { FSDragOperation } from "./widget/drag";
 import { FSTemplate } from "../classes/template";
@@ -24,6 +24,7 @@ import { FSUserDialog } from "./dialogs/user-dialog";
 import { FSGroupDialog } from "./dialogs/group-dialog";
 import { FS_EVAL_WIDGET_FACTORY_ID, XQ_EXT } from '../classes/eval';
 import { FSLabelProviderContribution } from "./label-provider-contribution";
+import { API_MINIMUM_VERSION } from "../variables";
 
 function sortText(A: string, B: string, caseSensetive = false): number {
   let a = A;

@@ -33,8 +33,9 @@
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
     "clean": "rimraf lib",
-    "build": "tsc",
-    "watch": "tsc -w"
+    "build": "yarn run config && tsc",
+    "config": "node config",
+    "watch": "yarn run config && tsc -w"
   },
   "theiaExtensions": [
     {
