@@ -1161,14 +1161,14 @@ export class FSCore {
       })).filter(node => !!node) as FSItemNode[];
       // TODO: implement softRefresh method
       let container: FSNode | undefined;
-      const interval = setInterval(() => {
+      // const interval = setInterval(() => {
         container = this.getNode(id);
         if (FSNode.isCollection(container)) {
           const collection = container;
-          clearInterval(interval);
-          this.refresh(collection);
+          // clearInterval(interval);
+          this.expand(collection);
         }
-      }, 33);
+      // }, 33);
       this.updating = true;
       return result;
     } else {
