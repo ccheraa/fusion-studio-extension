@@ -27,6 +27,7 @@ import { FS_EVAL_WIDGET_FACTORY_ID, XQ_EXT } from '../classes/eval';
 import { FSLabelProviderContribution } from "./label-provider-contribution";
 import { FSDialog } from "./dialogs/basic";
 import { FSViewWidget } from "./widget";
+import { NativeServer } from "../common/native";
 
 export const FS_CONNECTIONS_WIDGET_FACTORY_ID = 'fusion-view';
 
@@ -54,6 +55,7 @@ export class FSCore {
   public connections: FSServerConnections = {};
   protected nodesToUpdate: FSNode[] = [];
   constructor(
+    @inject(NativeServer) protected readonly native: NativeServer,
     @inject(CommandRegistry) protected readonly commands: CommandRegistry,
     @inject(WorkspaceService) protected readonly workspace: WorkspaceService,
     @inject(FileDialogService) protected readonly fileDialog: FileDialogService,
@@ -1506,6 +1508,12 @@ export class FSCore {
       }
     }
     return true;
+  }
+
+  public async nativeUpload(node: FSCollectionNode, files: string[]): Promise<number> {
+    await this.native.upload(node.connectionNode.connection.server, node.connectionNode.connection.username, node.connectionNode.connection.password, node.collection.name, files);
+    this.load(node, node.uri);
+    return 0;
   }
 
   public async uploadItem(): Promise<boolean> {

@@ -14,7 +14,7 @@
     "@theia/markers": "^1.9.0",
     "@theia/monaco": "^1.9.0",
     "@theia/messages": "^1.9.0",
-    "fusion-studio-extension": "file:../fusion-studio-extension"
+    "fusion-studio-extension": "1.1.0"
   },
   "devDependencies": {
     "@theia/cli": "^1.9.0"
