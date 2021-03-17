@@ -77,6 +77,46 @@ Cypress.Commands.add('addDocument', (collection, name, type = '') => {
   cy.get('#theia-top-panel .p-MenuBar-item').contains('File').click()
   cy.get('.p-Menu-item[data-type=command][data-command=core\\.save]').click()
 });
+Cypress.Commands.add('dragFileTo', (collection, files, mimeType = 'application/octet-stream') => {
+  cy.waitForLoading();
+
+  cy.window().then (win => {
+    class ExFile extends win.File {
+      webkitGetAsEntry() {
+        const me = this;
+        return {
+          isDirectory: false,
+          isFile: true,
+          fullPath: '/' + this.name,
+          file(callback) {
+            callback(me);
+          }
+        };
+      }
+    }
+  
+    if (typeof files === 'string') {
+      files = { [files]: files };
+    } else if (files.length) {
+      files = files.reduce((result, file) => ({ ...result, [file]: file }), {});
+    }
+    Promise.all(Object.keys(files).map(filename => new Promise(resolve => cy
+      .fixture(files[filename], 'base64')
+      .then(Cypress.Blob.base64StringToBlob)
+      .then(blob => new ExFile([blob], filename, { type: mimeType }))
+      .then(resolve)))).then(fileTree => {
+      const dataTransfer = new win.DataTransfer();
+      fileTree.forEach(file => dataTransfer.items.add(file));
+      const newDataTransfer = {
+        ...dataTransfer,
+        items: [...fileTree],
+        files: [...fileTree],
+      };
+      newDataTransfer.getData = (...args) => dataTransfer.getData(...args);
+      return cy.getTreeNode(collection).trigger('drop', { dataTransfer: newDataTransfer });
+    });
+  });
+});
 
 export const dialogOverlay = '.p-Widget.dialogOverlay#theia-dialog-shell';
 export const dialog = '.p-Widget.dialogOverlay#theia-dialog-shell .dialogBlock';
