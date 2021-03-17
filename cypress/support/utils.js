@@ -77,20 +77,49 @@ Cypress.Commands.add('addDocument', (collection, name, type = '') => {
   cy.get('#theia-top-panel .p-MenuBar-item').contains('File').click()
   cy.get('.p-Menu-item[data-type=command][data-command=core\\.save]').click()
 });
+Cypress.Commands.add('checkDocumentText', (document, content) => {
+  if (typeof content === 'string') {
+    content = [content]
+  }
+  cy.waitForLoading();
+  cy.getTreeNode(document).dblclick();
+  cy.waitForLoading();
+  cy.get('.p-Widget.p-TabBar li[title*=' + CSS.escape(document) + ']').click();
+  cy.get('.p-Widget.theia-editor.p-DockPanel-widget:not(.p-mod-hidden) [role=presentation].editor-scrollable').then(el => {
+    content.forEach(line => cy.get(el).contains(line));
+  });
+});
 Cypress.Commands.add('dragFileTo', (collection, files, mimeType = 'application/octet-stream') => {
   cy.waitForLoading();
 
   cy.window().then (win => {
     class ExFile extends win.File {
+      constructor(root, data, fileName, options) {
+        super(data, fileName, options);
+        this.root = root;
+      }
       webkitGetAsEntry() {
         const me = this;
         return {
           isDirectory: false,
           isFile: true,
-          fullPath: '/' + this.name,
-          file(callback) {
-            callback(me);
-          }
+          fullPath: this.root + this.name,
+          file: callback => callback(this),
+        };
+      }
+    }
+    class ExDir extends ExFile {
+      constructor(root, entries, fileName, options) {
+        super(root, [], fileName, options);
+        this.entries = entries.map(entry => entry.webkitGetAsEntry());
+      }
+      webkitGetAsEntry() {
+        const me = this;
+        return {
+          isDirectory: true,
+          isFile: false,
+          fullPath: this.root + this.name,
+          createReader: () => ({ readEntries: callback => callback(this.entries) }),
         };
       }
     }
@@ -100,20 +129,28 @@ Cypress.Commands.add('dragFileTo', (collection, files, mimeType = 'application/o
     } else if (files.length) {
       files = files.reduce((result, file) => ({ ...result, [file]: file }), {});
     }
-    Promise.all(Object.keys(files).map(filename => new Promise(resolve => cy
-      .fixture(files[filename], 'base64')
-      .then(Cypress.Blob.base64StringToBlob)
-      .then(blob => new ExFile([blob], filename, { type: mimeType }))
-      .then(resolve)))).then(fileTree => {
-      const dataTransfer = new win.DataTransfer();
-      fileTree.forEach(file => dataTransfer.items.add(file));
-      const newDataTransfer = {
-        ...dataTransfer,
+    function createFilesTree(filesTree, root) {
+      return Promise.all(Object.keys(filesTree).map(filename => typeof filesTree[filename] === 'string'
+        ? new Promise(resolve => cy
+          .fixture(filesTree[filename], 'base64')
+          .then(Cypress.Blob.base64StringToBlob)
+          .then(blob => new ExFile(root, [blob], filename, { type: mimeType }))
+          .then(resolve))
+        : new Promise(resolve => {
+          createFilesTree(filesTree[filename], root + filename + '/').then(enteries => resolve(new ExDir(root, enteries, filename)));
+        })
+      ));
+    }
+    createFilesTree(files, '/').then(fileTree => {
+      const originalDataTransfer = new win.DataTransfer();
+      fileTree.forEach(file => originalDataTransfer.items.add(file));
+      const dataTransfer = {
+        ...originalDataTransfer,
         items: [...fileTree],
         files: [...fileTree],
       };
-      newDataTransfer.getData = (...args) => dataTransfer.getData(...args);
-      return cy.getTreeNode(collection).trigger('drop', { dataTransfer: newDataTransfer });
+      dataTransfer.getData = (...args) => originalDataTransfer.getData(...args);
+      return cy.getTreeNode(collection).trigger('drop', { dataTransfer });
     });
   });
 });

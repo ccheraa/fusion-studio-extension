@@ -1,9 +1,13 @@
 /// <reference types="cypress" />
 
+type Files = {
+  [k: string]: string | Files;
+};
 declare namespace Cypress {
   interface Cypress {
     formatDate(date?: Date): string;
   }
+
   interface Chainable<Subject> {
     getMenuCommand(command: string, options: any): Chainable<Subject>;
     getSubMenu(text: string, options: any): Chainable<Subject>;
@@ -23,8 +27,10 @@ declare namespace Cypress {
     checked(): Chainable<Subject>;
     notChecked(): Chainable<Subject>;
     addDocument(collection: string, name: string, type?: string): Chainable<Subject>;
+    checkDocumentText(document: string, content: string): Chainable<Subject>;
+    checkDocumentText(document: string, lines: string[]): Chainable<Subject>;
     dragFileTo(collection: string, filename: string, mimeType?: string): Chainable<Subject>;
     dragFileTo(collection: string, files: string[], mimeType?: string): Chainable<Subject>;
-    dragFileTo(collection: string, files: Record<string, string>, mimeType?: string): Chainable<Subject>;
+    dragFileTo(collection: string, files: Files, mimeType?: string): Chainable<Subject>;
   }
 }
