@@ -23,5 +23,8 @@ declare namespace Cypress {
     checked(): Chainable<Subject>;
     notChecked(): Chainable<Subject>;
     addDocument(collection: string, name: string, type?: string): Chainable<Subject>;
+    dragFileTo(collection: string, filename: string, mimeType?: string): Chainable<Subject>;
+    dragFileTo(collection: string, files: string[], mimeType?: string): Chainable<Subject>;
+    dragFileTo(collection: string, files: Record<string, string>, mimeType?: string): Chainable<Subject>;
   }
 }
