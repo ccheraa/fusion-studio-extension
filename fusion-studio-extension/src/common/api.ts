@@ -155,7 +155,7 @@ export namespace FSApi {
   
   export async function newCollection(connection: FSServerConnection, uri: string): Promise<FSCollection> {
     try {
-      const result = await _put(connection, FS_API_URI + '/collection?uri=' + uri);
+      const result = await _put(connection, FS_API_URI + '/collection?uri=' + encodeURI(uri));
       switch (result.status) {
         case 201:
           const json = await result.json();

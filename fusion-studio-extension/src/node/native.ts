@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import { readFile, lstatSync, readdirSync } from 'fs';
 import { join } from 'path';
-import { FSDocument } from '../classes/item';
+import { FSDocument, readItem } from '../classes/item';
 import { createError, FSError } from '../classes/error';
 import { NativeServer } from '../common/native';
 import * as FormData from 'form-data';
@@ -31,23 +31,15 @@ export class NativeServerImpl implements NativeServer {
   upload(server: string, username: string, password: string, parent: string, files: string): Promise<number>;
   upload(server: string, username: string, password: string, parent: string, files: string | string[]): Promise<number> {
     return new Promise(async (resolve, reject) => {
-      console.log('server:', server);
-      console.log('username:', username);
-      console.log('password:', password);
-      console.log('files:', files);
       if (typeof files === 'string') {
         files = [files];
       }
       const root = this.getRoot(files);
-      console.log('roots:', root);
       const docs = await this.listFiles(files, root.length);
-      console.log('docs:', docs);
       try {
         await this.doUpload(server, username, password, parent, docs);
-        console.log('UPLOADED');
         resolve(files.length);
       } catch (e) {
-        console.log('ERROR UPLOADING');
         console.dir(e);
         reject(e);
       }
@@ -101,7 +93,7 @@ export class NativeServerImpl implements NativeServer {
         body,
       });
       switch (result.status) {
-        case 201: return Promise.resolve([]); // all((await result.json() as any[]).map(doc => readItem(doc, connection ? connection.username : '') as FSDocument));
+        case 201: return Promise.all((await result.json() as any[]).map(doc => readItem(doc, username) as FSDocument));
         case 401: throw createError(FSError.permissionDenied, result);
         default: throw createError(FSError.unknown, result);
       }

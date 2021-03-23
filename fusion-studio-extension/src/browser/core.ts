@@ -1511,9 +1511,9 @@ export class FSCore {
   }
 
   public async nativeUpload(node: FSCollectionNode, files: string[]): Promise<number> {
-    await this.native.upload(node.connectionNode.connection.server, node.connectionNode.connection.username, node.connectionNode.connection.password, node.collection.name, files);
+    const count = await this.native.upload(node.connectionNode.connection.server, node.connectionNode.connection.username, node.connectionNode.connection.password, node.collection.name, files);
     this.load(node, node.uri);
-    return 0;
+    return count;
   }
 
   public async uploadItem(): Promise<boolean> {

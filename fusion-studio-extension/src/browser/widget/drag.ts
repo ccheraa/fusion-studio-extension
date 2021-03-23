@@ -147,9 +147,9 @@ export class DragController {
         if(window.process) {
           const files: string[] = [];
           for (let i = 0; i < event.dataTransfer.files.length; i++) {
-            files.push(event.dataTransfer.files[i].path || '/home/ccheraa/Pictures/' + event.dataTransfer.files[i].name);
+            files.push(event.dataTransfer.files[i].path);
           }
-          this.core.nativeUpload(operation.destinationContainer, files).then(result => console.log('uploaded:', result)).then(n => console.log('Uploaded via backend:', n));
+          this.core.nativeUpload(operation.destinationContainer, files);
         } else {
           const entries: WebKitEntry[] = [];
           for (let i = 0; i < event.dataTransfer.items.length; i++) {
